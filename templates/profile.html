@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Build Profile — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📋 Build Your Profile</h1>
+      <p class="page-sub">The more detailed your profile, the better the ML recommendations</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+
+      <div class="form-grid-2">
+        <!-- Skills -->
+        <div class="form-group full-width">
+          <label class="form-label">💡 Your Skills <span class="label-hint">(comma-separated)</span></label>
+          <input type="text" name="skills" class="form-input"
+                 value="{{ profile.skills if profile else '' }}"
+                 placeholder="e.g. Python, Machine Learning, SQL, Flask, JavaScript"
+                 required>
+          <div class="field-hint">More skills = better matching. Separate with commas.</div>
+        </div>
+
+        <!-- Experience -->
+        <div class="form-group">
+          <label class="form-label">⏱ Experience Level</label>
+          <select name="experience" class="form-input">
+            {% for exp in ['0-1 years','1-3 years','3-5 years','5-8 years','8+ years'] %}
+            <option value="{{ exp }}" {% if profile and profile.experience == exp %}selected{% endif %}>{{ exp }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Education -->
+        <div class="form-group">
+          <label class="form-label">🎓 Highest Education</label>
+          <select name="education" class="form-input">
+            {% for edu in ['B.Tech','B.Sc.','BCA','MCA','M.Tech','MBA','PhD','Diploma','B.Com','B.A.','B.Des','Self-taught'] %}
+            <option value="{{ edu }}" {% if profile and profile.education == edu %}selected{% endif %}>{{ edu }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label">📍 Preferred Location</label>
+          <input type="text" name="location" class="form-input"
+                 value="{{ profile.location if profile else '' }}"
+                 placeholder="e.g. Bangalore, Mumbai, Remote">
+        </div>
+
+        <!-- Domain -->
+        <div class="form-group">
+          <label class="form-label">🏢 Domain / Industry</label>
+          <select name="domain" class="form-input">
+            {% for d in ['Any','Software Engineering','Data Science','Web Development',
+              'Mobile Development','Cloud & DevOps','Cybersecurity','Database',
+              'Product Management','Design','Finance','Marketing',
+              'Human Resources','Operations','Software Testing','Embedded Systems',
+              'Blockchain','Technical Writing'] %}
+            <option value="{{ d }}" {% if profile and profile.domain == d %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Expected Salary -->
+        <div class="form-group">
+          <label class="form-label">💰 Expected Salary</label>
+          <select name="expected_salary" class="form-input">
+            {% for s in ['3-5 LPA','5-8 LPA','8-12 LPA','12-18 LPA','18-25 LPA','25-40 LPA','40+ LPA'] %}
+            <option value="{{ s }}" {% if profile and profile.expected_salary == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Goals -->
+        <div class="form-group full-width">
+          <label class="form-label">🚀 Career Goals</label>
+          <textarea name="goals" class="form-input" rows="3"
+                    placeholder="e.g. I want to transition into Data Science, work at a product company, or lead a team...">{{ profile.goals if profile else '' }}</textarea>
+          <div class="field-hint">Helps the AI understand your aspirations beyond just skills.</div>
+        </div>
+
+        <!-- Resume Upload -->
+        <div class="form-group full-width">
+          <label class="form-label">📎 Upload Resume (PDF or TXT)</label>
+          <div class="upload-area" onclick="document.getElementById('resume').click()">
+            <input type="file" name="resume" id="resume" accept=".pdf,.txt" style="display:none">
+            <div class="upload-icon">📂</div>
+            <div class="upload-text">Click to select file (PDF or TXT, max 5MB)</div>
+            {% if profile and profile.resume_filename %}
+            <div class="upload-current">Current: <strong>{{ profile.resume_filename }}</strong></div>
+            {% endif %}
+          </div>
+          <div class="field-hint">Resume text is analyzed by the ML model to improve matching accuracy.</div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">
+          🤖 Save Profile &amp; Get Recommendations →
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('resume').addEventListener('change', function(){
+  const name = this.files[0]?.name || '';
+  if(name) document.querySelector('.upload-text').textContent = '✅ ' + name;
+});
+</script>
+{% endblock %}

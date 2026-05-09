@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}CareerAI — Smart Job Recommendations{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">🤖 Powered by Machine Learning</div>
+      <h1 class="hero-title">
+        Find Your <span class="gradient-text">Dream Job</span><br>
+        with AI Precision
+      </h1>
+      <p class="hero-sub">
+        Our ML engine uses <strong>TF-IDF Vectorization</strong> &amp; <strong>Cosine Similarity</strong>
+        to match your skills, experience, and goals with the most relevant jobs —
+        with real match percentage scores.
+      </p>
+      <div class="hero-cta">
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started Free →</a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Login</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span>{{ total_jobs }}+</span> Jobs</div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><span>{{ categories }}</span> Categories</div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><span>95%</span> ML Accuracy</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="job-card-preview">
+        <div class="jcp-header">
+          <div class="jcp-icon">💼</div>
+          <div>
+            <div class="jcp-title">Data Scientist</div>
+            <div class="jcp-company">Flipkart · Bangalore</div>
+          </div>
+          <div class="jcp-badge">⭐ Top Pick</div>
+        </div>
+        <div class="jcp-match">
+          <div class="jcp-match-label">AI Match Score</div>
+          <div class="jcp-bar-wrap">
+            <div class="jcp-bar"><div class="jcp-fill" style="width:91%"></div></div>
+            <span class="jcp-pct">91%</span>
+          </div>
+        </div>
+        <div class="jcp-skills">
+          <span class="skill-green">✓ Python</span>
+          <span class="skill-green">✓ ML</span>
+          <span class="skill-green">✓ SQL</span>
+          <span class="skill-red">+ TensorFlow</span>
+        </div>
+        <div class="jcp-sal">₹25–35 LPA · Full-time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section bg-white">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">How the ML Algorithm Works</h2>
+      <p class="section-sub">A transparent look at the recommendation engine</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">📝</div>
+        <h3>Profile Input</h3>
+        <p>You enter skills, experience, education, and career goals. A resume PDF can also be uploaded.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔢</div>
+        <h3>TF-IDF Vectorization</h3>
+        <p>Your profile and all job descriptions are converted to numeric vectors using Term Frequency–Inverse Document Frequency.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">📐</div>
+        <h3>Cosine Similarity</h3>
+        <p>The angle between your profile vector and each job vector is computed — smaller angle = higher match score.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">🌳</div>
+        <h3>Random Forest</h3>
+        <p>A Random Forest classifier (95.24% accuracy) predicts your best-fit job category and boosts matching jobs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section bg-gray">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Everything You Need</h2>
+    </div>
+    <div class="features-grid">
+      {% for icon, title, desc in [
+        ('🎯','Personalized Matches','ML computes match % for every job based on your unique profile'),
+        ('📄','Resume Analysis','Upload PDF/TXT resume for AI-powered skill extraction'),
+        ('📊','Skill Gap Analysis','See exactly which skills you have vs what each job requires'),
+        ('💾','Save & Apply','Save interesting jobs and track all your applications'),
+        ('🔍','Smart Search','Search across 100+ jobs by title, company, or skill'),
+        ('👨‍💼','Admin Panel','Admins can manage jobs, users, upload CSVs, and view analytics'),
+      ] %}
+      <div class="feature-card">
+        <div class="feature-icon">{{ icon }}</div>
+        <h3>{{ title }}</h3>
+        <p>{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Ready to find your perfect career match?</h2>
+    <p>Join thousands of students and professionals using AI to land their dream job</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Create Free Account →</a>
+  </div>
+</section>
+
+{% endblock %}

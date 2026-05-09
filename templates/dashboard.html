@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Welcome, {{ session.get('user_name') }}! 👋</h1>
+      <p class="page-sub">Here's your personalized career overview</p>
+    </div>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">View Jobs →</a>
+  </div>
+
+  <!-- STATS CARDS -->
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-icon">💼</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ saved_count }}</div>
+        <div class="stat-label">Saved Jobs</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ applied_count }}</div>
+        <div class="stat-label">Applications Sent</div>
+      </div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon">🤖</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ category_confidence or 0 }}%</div>
+        <div class="stat-label">Category Match</div>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ predicted_category or '—' }}</div>
+        <div class="stat-label">Best Fit Category</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- PROFILE CARD -->
+    <div class="card">
+      <div class="card-head">
+        <h2>📋 Your Profile</h2>
+        <a href="{{ url_for('profile') }}" class="btn-sm">Edit</a>
+      </div>
+      {% if profile %}
+      <div class="profile-grid">
+        <div class="profile-item">
+          <span class="pi-label">Skills</span>
+          <div class="skill-chips">
+            {% for sk in (profile.skills or '').split(',') %}
+              {% if sk.strip() %}<span class="chip chip-blue">{{ sk.strip() }}</span>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        <div class="profile-item">
+          <span class="pi-label">Experience</span>
+          <span class="pi-val">{{ profile.experience or '—' }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="pi-label">Education</span>
+          <span class="pi-val">{{ profile.education or '—' }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="pi-label">Location</span>
+          <span class="pi-val">📍 {{ profile.location or '—' }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="pi-label">Domain</span>
+          <span class="pi-val">{{ profile.domain or '—' }}</span>
+        </div>
+        <div class="profile-item">
+          <span class="pi-label">Expected Salary</span>
+          <span class="pi-val">{{ profile.expected_salary or '—' }}</span>
+        </div>
+        {% if profile.resume_filename %}
+        <div class="profile-item">
+          <span class="pi-label">Resume</span>
+          <span class="chip chip-green">📎 {{ profile.resume_filename }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="empty-profile">
+        <p>No profile yet. Build your profile to get personalized recommendations!</p>
+        <a href="{{ url_for('profile') }}" class="btn btn-primary">Build Profile →</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- AI PREDICTION CARD -->
+    <div class="card">
+      <div class="card-head">
+        <h2>🤖 AI Prediction</h2>
+      </div>
+      {% if predicted_category %}
+      <div class="ai-prediction">
+        <div class="ai-cat">{{ predicted_category }}</div>
+        <div class="ai-conf">
+          <div class="conf-label">Confidence Score</div>
+          <div class="conf-bar">
+            <div class="conf-fill" style="width:{{ category_confidence }}%"></div>
+          </div>
+          <div class="conf-pct">{{ category_confidence }}%</div>
+        </div>
+        <p class="ai-desc">
+          Based on your skills and experience, our <strong>Random Forest classifier</strong>
+          predicts you're best suited for <strong>{{ predicted_category }}</strong> roles.
+        </p>
+        <a href="{{ url_for('recommendations') }}?category={{ predicted_category }}" class="btn btn-primary btn-full">
+          See {{ predicted_category }} Jobs →
+        </a>
+      </div>
+      {% else %}
+      <div class="empty-profile">
+        <p>Complete your profile to see AI-based category prediction.</p>
+        <a href="{{ url_for('profile') }}" class="btn btn-outline">Update Profile</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="card">
+    <div class="card-head"><h2>⚡ Quick Actions</h2></div>
+    <div class="quick-actions">
+      <a href="{{ url_for('recommendations') }}" class="qa-btn">
+        <div class="qa-icon">🎯</div>
+        <div>Get Recommendations</div>
+      </a>
+      <a href="{{ url_for('profile') }}" class="qa-btn">
+        <div class="qa-icon">📝</div>
+        <div>Update Profile</div>
+      </a>
+      <a href="{{ url_for('saved_jobs') }}" class="qa-btn">
+        <div class="qa-icon">💾</div>
+        <div>Saved Jobs</div>
+      </a>
+      <a href="{{ url_for('search') }}" class="qa-btn">
+        <div class="qa-icon">🔍</div>
+        <div>Search Jobs</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

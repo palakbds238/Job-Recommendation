@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Error {{ code }} — CareerAI{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;padding:2rem">
+  <div style="text-align:center">
+    <div style="font-size:80px;font-weight:900;color:var(--border);line-height:1">{{ code }}</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin:16px 0 8px">
+      {% if code == 404 %}Page Not Found{% else %}Something Went Wrong{% endif %}
+    </h2>
+    <p style="color:var(--text-2);margin-bottom:2rem">{{ msg }}</p>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <a href="{{ url_for('home') }}" class="btn btn-primary">Go Home</a>
+      <button onclick="history.back()" class="btn btn-outline">Go Back</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

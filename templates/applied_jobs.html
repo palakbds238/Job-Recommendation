@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Applied Jobs — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">✅ Applied Jobs</h1>
+      <p class="page-sub">{{ applied_jobs|length }} application{{ 's' if applied_jobs|length != 1 }}</p>
+    </div>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Find More Jobs →</a>
+  </div>
+
+  {% if applied_jobs %}
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Job Title</th>
+          <th>Company</th>
+          <th>Applied On</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in applied_jobs %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><strong>{{ job.job_title }}</strong></td>
+          <td>{{ job.company }}</td>
+          <td>{{ job.applied_at[:16] if job.applied_at else '—' }}</td>
+          <td>
+            {% set statuses = ['Under Review', 'Shortlisted', 'Application Sent', 'Under Review', 'In Progress'] %}
+            {% set colors   = ['chip-blue',   'chip-green',  'chip-gray',        'chip-blue',   'chip-purple'] %}
+            {% set idx = loop.index0 % 5 %}
+            <span class="chip {{ colors[idx] }}">{{ statuses[idx] }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📨</div>
+    <h3>No applications yet</h3>
+    <p>Browse your recommendations and click "Apply Now" to start applying.</p>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Get Recommendations →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

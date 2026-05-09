@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} at {{ job.company }} — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="{{ url_for('recommendations') }}">← Recommendations</a>
+    <span> / </span>
+    <span>{{ job.title }}</span>
+  </div>
+
+  <div class="jd-grid">
+    <!-- LEFT: Main Details -->
+    <div class="jd-main">
+
+      <!-- Header Card -->
+      <div class="card jd-header-card">
+        <div class="jdh-top">
+          <div class="jdh-icon">
+            {% if 'data' in job.category.lower() %}🔬
+            {% elif 'web' in job.category.lower() %}🌐
+            {% elif 'mobile' in job.category.lower() %}📱
+            {% elif 'cloud' in job.category.lower() %}☁️
+            {% elif 'cyber' in job.category.lower() %}🔐
+            {% elif 'finance' in job.category.lower() %}💹
+            {% elif 'design' in job.category.lower() %}🎨
+            {% else %}💼{% endif %}
+          </div>
+          <div class="jdh-meta">
+            <h1 class="jdh-title">{{ job.title }}</h1>
+            <div class="jdh-company">{{ job.company }}</div>
+            <div class="jdh-chips">
+              <span class="chip chip-blue">{{ job.category }}</span>
+              <span class="chip chip-gray">{{ job.job_type }}</span>
+              <span class="chip chip-gray">📍 {{ job.location }}</span>
+              <span class="chip chip-gray">⏱ {{ job.experience_required }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="jdh-salary">
+          <span class="sal-big">{{ job.salary_range }}</span>
+          <span class="sal-note">per annum · {{ job.openings|int }} opening{{ 's' if job.openings|int != 1 }}</span>
+        </div>
+        <div class="jdh-actions">
+          <button id="saveBtn" class="btn btn-outline {% if is_saved %}saved-active{% endif %}"
+                  onclick="toggleSave({{ job.job_id }})">
+            {% if is_saved %}💾 Saved{% else %}🔖 Save Job{% endif %}
+          </button>
+          <button id="applyBtn" class="btn btn-primary {% if is_applied %}disabled-btn{% endif %}"
+                  onclick="applyJob({{ job.job_id }}, '{{ job.title|replace("'","") }}', '{{ job.company|replace("'","") }}')"
+                  {% if is_applied %}disabled{% endif %}>
+            {% if is_applied %}✅ Already Applied{% else %}Apply Now →{% endif %}
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="card">
+        <div class="card-head"><h2>📋 Job Description</h2></div>
+        <p style="color:var(--text-2);line-height:1.8;font-size:15px">{{ job.description }}</p>
+        <br>
+        <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px">What you'll do:</h3>
+        <ul class="jd-bullets">
+          <li>Work on real-world projects using {{ job.skills_required.split(',')[0].strip() }}</li>
+          <li>Collaborate with cross-functional teams in an agile environment</li>
+          <li>Write clean, maintainable, and well-tested code</li>
+          <li>Participate in code reviews and technical discussions</li>
+          <li>Contribute to system architecture and design decisions</li>
+        </ul>
+      </div>
+
+      <!-- Skills Required -->
+      <div class="card">
+        <div class="card-head"><h2>🛠 Skills Required</h2></div>
+        <div class="skill-chips" style="gap:8px">
+          {% for sk in job.skills_required.split(',') %}
+          <span class="chip chip-blue" style="padding:6px 14px;font-size:13.5px">{{ sk.strip() }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Similar Jobs -->
+      {% if similar_jobs %}
+      <div class="card">
+        <div class="card-head"><h2>🔗 Similar Jobs in {{ job.category }}</h2></div>
+        <div class="similar-grid">
+          {% for sj in similar_jobs %}
+          <a href="{{ url_for('job_detail', job_id=sj.job_id) }}" class="similar-card">
+            <div class="sc-title">{{ sj.title }}</div>
+            <div class="sc-company">{{ sj.company }}</div>
+            <div class="sc-sal">{{ sj.salary_range }}</div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="jd-sidebar">
+      <div class="card">
+        <div class="card-head"><h2>ℹ️ Job Overview</h2></div>
+        {% for label, val in [
+          ('📍 Location', job.location),
+          ('💼 Job Type', job.job_type),
+          ('⏱ Experience', job.experience_required),
+          ('🎓 Education', job.education_required),
+          ('💰 Salary', job.salary_range),
+          ('🏢 Category', job.category),
+          ('👥 Openings', job.openings|int|string),
+        ] %}
+        <div class="overview-row">
+          <span class="ov-label">{{ label }}</span>
+          <span class="ov-val">{{ val }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>🏢 About {{ job.company }}</h2></div>
+        <p style="font-size:14px;color:var(--text-2);line-height:1.7">
+          {{ job.company }} is a leading company in the {{ job.category }} domain,
+          known for innovation and a strong engineering culture. They offer competitive
+          salaries, great benefits, and excellent growth opportunities.
+        </p>
+      </div>
+
+      <div class="card" style="background:var(--blue-light);border-color:#c5d9fc">
+        <div style="text-align:center;padding:0.5rem">
+          <div style="font-size:32px;margin-bottom:8px">🤖</div>
+          <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px">
+            Get your Match Score
+          </div>
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:1rem">
+            Build your profile to see how well you match this role.
+          </p>
+          <a href="{{ url_for('profile') }}" class="btn btn-primary btn-full">Update Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.breadcrumb { margin-bottom: 1rem; font-size: 14px; color: var(--text-2); }
+.breadcrumb a { color: var(--blue); }
+.jd-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start; }
+.jd-header-card {}
+.jdh-top { display: flex; gap: 16px; margin-bottom: 1.25rem; }
+.jdh-icon { width: 60px; height: 60px; background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.jdh-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.jdh-company { font-size: 15px; color: var(--text-2); font-weight: 500; margin-bottom: 10px; }
+.jdh-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.jdh-salary { display: flex; align-items: baseline; gap: 10px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; margin-bottom: 1rem; }
+.sal-big { font-size: 22px; font-weight: 800; color: var(--navy); }
+.sal-note { font-size: 13px; color: var(--text-3); }
+.jdh-actions { display: flex; gap: 10px; }
+.saved-active { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.disabled-btn { background: var(--green); opacity: 1; cursor: default; }
+.jd-bullets { padding-left: 1.25rem; color: var(--text-2); font-size: 14px; line-height: 2; }
+.overview-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.overview-row:last-child { border-bottom: none; }
+.ov-label { color: var(--text-3); font-size: 13px; }
+.ov-val { font-weight: 600; color: var(--navy); text-align: right; }
+.similar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.similar-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: block; text-decoration: none; transition: all 0.15s; }
+.similar-card:hover { border-color: var(--blue); background: var(--blue-light); text-decoration: none; }
+.sc-title { font-size: 13.5px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+.sc-company { font-size: 12px; color: var(--text-2); margin-bottom: 5px; }
+.sc-sal { font-size: 12px; font-weight: 600; color: var(--green); }
+@media (max-width: 900px) { .jd-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+function toggleSave(jobId) {
+  const btn = document.getElementById('saveBtn');
+  const isSaved = btn.classList.contains('saved-active');
+  fetch(isSaved ? '/unsave_job' : '/save_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  }).then(r => r.json()).then(d => {
+    if (d.status === 'saved') {
+      btn.innerHTML = '💾 Saved'; btn.classList.add('saved-active');
+    } else {
+      btn.innerHTML = '🔖 Save Job'; btn.classList.remove('saved-active');
+    }
+  });
+}
+function applyJob(jobId, title, company) {
+  fetch('/apply_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId, title, company})
+  }).then(r => r.json()).then(d => {
+    const btn = document.getElementById('applyBtn');
+    btn.textContent = '✅ Applied!';
+    btn.disabled = true;
+    btn.classList.add('disabled-btn');
+    showToast(d.message);
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Job Recommendations — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🎯 Your AI-Matched Jobs</h1>
+      <p class="page-sub">
+        Based on your profile · {{ recommendations|length }} jobs found
+        <span class="ai-badge-inline">🤖 ML Powered</span>
+      </p>
+    </div>
+    <a href="{{ url_for('profile') }}" class="btn btn-outline">Update Profile</a>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar card">
+    <form method="GET" action="{{ url_for('recommendations') }}">
+      <div class="filter-row">
+        <div class="filter-item">
+          <label>Category</label>
+          <select name="category" class="form-input-sm">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Location</label>
+          <select name="location" class="form-input-sm">
+            <option value="">Any Location</option>
+            {% for loc in locations %}
+            <option value="{{ loc }}" {% if filters.location == loc %}selected{% endif %}>{{ loc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Experience</label>
+          <select name="experience" class="form-input-sm">
+            <option value="">Any Level</option>
+            {% for exp in experience_levels %}
+            <option value="{{ exp }}" {% if filters.experience == exp %}selected{% endif %}>{{ exp }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Min Salary (LPA)</label>
+          <input type="number" name="min_salary" class="form-input-sm" min="0" max="100"
+                 value="{{ filters.min_salary }}" placeholder="e.g. 10">
+        </div>
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+        <a href="{{ url_for('recommendations') }}" class="btn btn-outline">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- PROFILE SUMMARY -->
+  <div class="profile-summary-bar">
+    <span>📋 <strong>Your Profile:</strong></span>
+    {% for sk in (profile.skills or '').split(',')[:5] %}
+      {% if sk.strip() %}<span class="chip chip-blue">{{ sk.strip() }}</span>{% endif %}
+    {% endfor %}
+    {% if profile.experience %}<span class="chip chip-gray">{{ profile.experience }}</span>{% endif %}
+    {% if profile.location %}<span class="chip chip-gray">📍 {{ profile.location }}</span>{% endif %}
+  </div>
+
+  <!-- JOB CARDS -->
+  {% if recommendations %}
+  <div class="jobs-list">
+    {% for job in recommendations %}
+    <div class="job-card {% if job.is_top_pick %}top-pick{% endif %}" data-job-id="{{ job.job_id }}">
+
+      {% if job.is_top_pick %}
+      <div class="top-pick-badge">⭐ Top Pick</div>
+      {% endif %}
+
+      <div class="jc-top">
+        <div class="jc-icon">
+          {% if 'data' in job.category.lower() %}🔬
+          {% elif 'web' in job.category.lower() %}🌐
+          {% elif 'mobile' in job.category.lower() %}📱
+          {% elif 'cloud' in job.category.lower() %}☁️
+          {% elif 'cyber' in job.category.lower() %}🔐
+          {% elif 'finance' in job.category.lower() %}💹
+          {% elif 'design' in job.category.lower() %}🎨
+          {% elif 'marketing' in job.category.lower() %}📢
+          {% elif 'embedded' in job.category.lower() %}⚙️
+          {% elif 'block' in job.category.lower() %}⛓️
+          {% else %}💼{% endif %}
+        </div>
+        <div class="jc-meta">
+          <div class="jc-title">{{ job.title }}</div>
+          <div class="jc-company">{{ job.company }} · {{ job.location }}</div>
+          <div class="jc-chips">
+            <span class="chip chip-gray">{{ job.category }}</span>
+            <span class="chip chip-gray">{{ job.experience }}</span>
+            <span class="chip chip-gray">{{ job.job_type }}</span>
+          </div>
+        </div>
+        <div class="jc-match-block">
+          <div class="match-circle {% if job.match_pct >= 75 %}high{% elif job.match_pct >= 55 %}mid{% else %}low{% endif %}">
+            <span>{{ job.match_pct }}%</span>
+          </div>
+          <div class="match-label-small">Match</div>
+        </div>
+      </div>
+
+      <!-- Match bar -->
+      <div class="jc-matchbar">
+        <span class="mb-label">AI Match Score</span>
+        <div class="mb-bar">
+          <div class="mb-fill {% if job.match_pct >= 75 %}high{% elif job.match_pct >= 55 %}mid{% else %}low{% endif %}"
+               style="width:{{ job.match_pct }}%"></div>
+        </div>
+        <span class="mb-pct">{{ job.match_pct }}%</span>
+      </div>
+
+      <!-- Skill Analysis -->
+      <div class="skill-analysis">
+        <div class="sa-row">
+          {% for sk in job.matched_skills[:5] %}
+          <span class="chip chip-green">✓ {{ sk }}</span>
+          {% endfor %}
+          {% for sk in job.missing_skills[:3] %}
+          <span class="chip chip-red">+ {{ sk }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="jc-desc">{{ job.description }}</div>
+
+      <!-- Why Recommended -->
+      <div class="why-rec">
+        💡 <strong>Why matched:</strong> {{ job.why_recommended }}
+      </div>
+
+      <!-- Footer -->
+      <div class="jc-footer">
+        <div class="jc-salary">
+          💰 {{ job.salary_range }}
+          <span class="openings-badge">{{ job.openings }} opening{{ 's' if job.openings != 1 }}</span>
+        </div>
+        <div class="jc-actions">
+          <a href="{{ url_for('job_detail', job_id=job.job_id) }}" class="btn btn-outline btn-sm">View Details</a>
+          <button class="btn-save {% if job.job_id in saved_ids %}saved{% endif %}"
+                  onclick="toggleSave(this, {{ job.job_id }})"
+                  data-job-id="{{ job.job_id }}">
+            {% if job.job_id in saved_ids %}💾 Saved{% else %}🔖 Save{% endif %}
+          </button>
+          <button class="btn btn-primary btn-sm"
+                  onclick="applyJob({{ job.job_id }}, '{{ job.title|replace("'","") }}', '{{ job.company|replace("'","") }}', this)">
+            Apply Now →
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No jobs found with current filters</h3>
+    <p>Try adjusting your filters or <a href="{{ url_for('recommendations') }}">reset all filters</a>.</p>
+    <a href="{{ url_for('profile') }}" class="btn btn-primary">Update Profile</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function toggleSave(btn, jobId) {
+  const isSaved = btn.classList.contains('saved');
+  const url = isSaved ? '/unsave_job' : '/save_job';
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'saved') {
+      btn.innerHTML = '💾 Saved';
+      btn.classList.add('saved');
+    } else {
+      btn.innerHTML = '🔖 Save';
+      btn.classList.remove('saved');
+    }
+  });
+}
+
+function applyJob(jobId, title, company, btn) {
+  fetch('/apply_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId, title, company})
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.textContent = '✅ Applied';
+    btn.disabled = true;
+    showToast(data.message);
+  });
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Manage Users — Admin{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">👥 Manage Users</h1>
+      <p class="page-sub">{{ users|length }} registered user{{ 's' if users|length != 1 }}</p>
+    </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Skills</th>
+            <th>Experience</th>
+            <th>Domain</th>
+            <th>Saved</th>
+            <th>Applied</th>
+            <th>Joined</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="user-avatar-sm">{{ user.name[0].upper() }}</div>
+                <strong>{{ user.name }}</strong>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>
+              {% if user.skills %}
+                {% for sk in user.skills.split(',')[:3] %}
+                <span class="chip chip-blue" style="font-size:11px">{{ sk.strip() }}</span>
+                {% endfor %}
+              {% else %}<span style="color:#90A4AE">—</span>{% endif %}
+            </td>
+            <td>{{ user.experience or '—' }}</td>
+            <td>{{ user.domain or '—' }}</td>
+            <td><span class="chip chip-green">{{ user.saved }}</span></td>
+            <td><span class="chip chip-purple">{{ user.applied }}</span></td>
+            <td>{{ user.created_at[:10] }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}"
+                    onsubmit="return confirm('Delete user {{ user.name }}? This cannot be undone.')">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="10" style="text-align:center;color:#90A4AE;padding:2rem">No users registered yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

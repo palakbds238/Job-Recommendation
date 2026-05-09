@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CareerAI — ML Job Recommender{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ─── NAVBAR ──────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-brand" href="{{ url_for('home') }}">
+      <span class="brand-icon">⚡</span>
+      Career<span class="brand-accent">AI</span>
+    </a>
+
+    <div class="nav-links">
+      {% if session.get('user_id') %}
+        {% if session.get('is_admin') %}
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+          <a href="{{ url_for('admin_analytics') }}" class="nav-link">Analytics</a>
+          <a href="{{ url_for('admin_jobs') }}" class="nav-link">Manage Jobs</a>
+          <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
+        {% else %}
+          <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+          <a href="{{ url_for('recommendations') }}" class="nav-link {% if request.endpoint == 'recommendations' %}active{% endif %}">Jobs</a>
+          <a href="{{ url_for('saved_jobs') }}" class="nav-link">Saved</a>
+          <a href="{{ url_for('applied_jobs') }}" class="nav-link">Applied</a>
+          <a href="{{ url_for('search') }}" class="nav-link">Search</a>
+        {% endif %}
+        <div class="nav-user">
+          <span class="user-avatar">{{ session.get('user_name','U')[0].upper() }}</span>
+          <span class="user-name">{{ session.get('user_name','') }}</span>
+          <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-nav-cta">Get Started</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- ─── FLASH MESSAGES ───────────────────────────────────────────────────── -->
+<div class="flash-container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}
+      <button onclick="this.parentElement.remove()">×</button>
+    </div>
+  {% endfor %}
+{% endwith %}
+</div>
+
+<!-- ─── PAGE CONTENT ─────────────────────────────────────────────────────── -->
+<main>{% block content %}{% endblock %}</main>
+
+<!-- ─── FOOTER ──────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p>⚡ <strong>CareerAI</strong> — ML-Based Job Recommendation System</p>
+    <p class="footer-sub">Built with Python · Flask · Scikit-learn · TF-IDF · Cosine Similarity</p>
+    <p class="footer-sub">College Project — Computer Science Department</p>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

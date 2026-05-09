@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Search Jobs — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1 class="page-title">🔍 Search Jobs</h1>
+    <p class="page-sub">Search across {{ 100 }}+ job listings by title, company, or skill</p>
+  </div>
+
+  <div class="card">
+    <form method="GET" action="{{ url_for('search') }}" class="search-form">
+      <div class="search-row">
+        <input type="text" name="q" class="search-input" value="{{ query }}"
+               placeholder="e.g. Data Scientist, Python Developer, Bangalore, React..." autofocus>
+        <button type="submit" class="btn btn-primary btn-lg">Search →</button>
+      </div>
+    </form>
+  </div>
+
+  {% if query %}
+  <div class="section-head">
+    <h2 class="section-title">
+      {% if results %}{{ results|length }} result{{ 's' if results|length != 1 }} for "{{ query }}"
+      {% else %}No results for "{{ query }}"{% endif %}
+    </h2>
+  </div>
+
+  {% if results %}
+  <div class="jobs-list">
+    {% for job in results %}
+    <div class="job-card">
+      <div class="jc-top">
+        <div class="jc-icon">💼</div>
+        <div class="jc-meta">
+          <div class="jc-title">{{ job.get('title','') }}</div>
+          <div class="jc-company">{{ job.get('company','') }} · {{ job.get('location','') }}</div>
+          <div class="jc-chips">
+            <span class="chip chip-gray">{{ job.get('category','') }}</span>
+            <span class="chip chip-gray">{{ job.get('experience_required','') }}</span>
+          </div>
+        </div>
+        <div class="jc-salary">💰 {{ job.get('salary_range','') }}</div>
+      </div>
+      <div class="jc-desc">{{ job.get('description','') }}</div>
+      <div class="skills-req">
+        <strong>Skills Required:</strong>
+        {% for sk in job.get('skills_required','').split(',') %}
+        <span class="chip chip-blue">{{ sk.strip() }}</span>
+        {% endfor %}
+      </div>
+      <div class="jc-footer">
+        <span class="chip chip-gray">{{ job.get('job_type','') }}</span>
+        <div class="jc-actions">
+          <button class="btn-save" onclick="saveJob(this, {{ job.get('job_id',0) }})">🔖 Save</button>
+          <button class="btn btn-primary btn-sm"
+                  onclick="applyJob({{ job.get('job_id',0) }}, '{{ job.get('title','') }}', '{{ job.get('company','') }}', this)">
+            Apply →
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No results found</h3>
+    <p>Try different keywords — e.g. "Python", "React", "Data Science", "Bangalore"</p>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔎</div>
+    <h3>Start your search</h3>
+    <p>Enter a job title, skill, company name, or location above.</p>
+    <div class="search-suggestions">
+      <strong>Popular searches:</strong>
+      {% for s in ['Python Developer','Data Scientist','React Developer','Machine Learning','Bangalore','Remote'] %}
+      <a href="{{ url_for('search') }}?q={{ s }}" class="chip chip-blue">{{ s }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function saveJob(btn, jobId) {
+  fetch('/save_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  }).then(() => { btn.innerHTML = '💾 Saved'; btn.classList.add('saved'); });
+}
+function applyJob(jobId, title, company, btn) {
+  fetch('/apply_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId, title, company})
+  }).then(r => r.json()).then(d => { btn.textContent = '✅ Applied'; btn.disabled = true; });
+}
+</script>
+{% endblock %}

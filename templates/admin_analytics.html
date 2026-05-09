@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Admin CareerAI{% endblock %}
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">📊 System Analytics</h1>
+      <p class="page-sub">Insights into job activity, user behavior, and ML performance</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="{{ url_for('admin_export_users') }}" class="btn btn-outline">📥 Export Users CSV</a>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">← Dashboard</a>
+    </div>
+  </div>
+
+  <!-- ML Model Performance Card -->
+  <div class="card" style="background:var(--navy);color:white;border:none">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;text-align:center">
+      {% for label, val, sub in [
+        ('Model Accuracy','95.24%','Random Forest on test set'),
+        ('TF-IDF Features','1,881','Unique terms in vocabulary'),
+        ('Training Jobs','80','80% of 101 job dataset'),
+        ('Categories','19','Job categories classified'),
+      ] %}
+      <div>
+        <div style="font-size:30px;font-weight:800;color:var(--gold)">{{ val }}</div>
+        <div style="font-size:15px;font-weight:600;margin-top:4px">{{ label }}</div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px">{{ sub }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-head"><h2>📂 Jobs by Category</h2></div>
+      <canvas id="catChart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>📍 Jobs by Location</h2></div>
+      <canvas id="locChart" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-head"><h2>⏱ Experience Distribution</h2></div>
+      <canvas id="expChart" height="260"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>💰 Salary Distribution</h2></div>
+      <canvas id="salChart" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Top Applied Jobs -->
+  {% if top_applied %}
+  <div class="card">
+    <div class="card-head"><h2>🔥 Most Applied Jobs</h2></div>
+    <table class="data-table">
+      <thead><tr><th>Rank</th><th>Job Title</th><th>Company</th><th>Applications</th><th>Interest Bar</th></tr></thead>
+      <tbody>
+        {% for job in top_applied %}
+        <tr>
+          <td><strong>#{{ loop.index }}</strong></td>
+          <td>{{ job.job_title }}</td>
+          <td>{{ job.company }}</td>
+          <td><span class="chip chip-green">{{ job.cnt }}</span></td>
+          <td>
+            <div style="background:var(--border);border-radius:4px;height:8px;width:140px">
+              <div style="background:var(--blue);height:100%;border-radius:4px;width:{{ (job.cnt / (top_applied[0].cnt or 1) * 100)|int }}%"></div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Top Saved Jobs -->
+  {% if top_saved %}
+  <div class="card">
+    <div class="card-head"><h2>💾 Most Saved Jobs (by ID)</h2></div>
+    <table class="data-table">
+      <thead><tr><th>Job ID</th><th>Times Saved</th></tr></thead>
+      <tbody>
+        {% for row in top_saved %}
+        <tr>
+          <td>Job #{{ row.job_id }}</td>
+          <td><span class="chip chip-purple">{{ row.cnt }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+const COLORS = ['#1A73E8','#00897B','#F9A825','#E53935','#8E24AA',
+                '#0288D1','#388E3C','#F57C00','#5E35B1','#D81B60',
+                '#00ACC1','#43A047','#FB8C00','#6D4C41','#546E7A'];
+
+const catData = {{ cat_stats|safe }};
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: COLORS, borderWidth: 2 }] },
+  options: { responsive: true, plugins: { legend: { position: 'right', labels: { font: { size: 11 } } } } }
+});
+
+const locData = {{ loc_stats|safe }};
+new Chart(document.getElementById('locChart'), {
+  type: 'bar',
+  data: { labels: Object.keys(locData), datasets: [{ label: 'Jobs', data: Object.values(locData), backgroundColor: '#1A73E8', borderRadius: 6 }] },
+  options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+
+const expData = {{ exp_stats|safe }};
+new Chart(document.getElementById('expChart'), {
+  type: 'pie',
+  data: { labels: Object.keys(expData), datasets: [{ data: Object.values(expData), backgroundColor: COLORS, borderWidth: 2 }] },
+  options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+});
+
+// Salary distribution chart (static demo data)
+new Chart(document.getElementById('salChart'), {
+  type: 'bar',
+  data: {
+    labels: ['3-5 LPA','5-10 LPA','10-18 LPA','18-30 LPA','30-60 LPA'],
+    datasets: [{ label: 'Jobs', data: [12, 28, 35, 18, 8], backgroundColor: ['#E0F2F1','#B2EBF2','#1A73E8','#F9A825','#E53935'], borderRadius: 8 }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+</script>
+{% endblock %}

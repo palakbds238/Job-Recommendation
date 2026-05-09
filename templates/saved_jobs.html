@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Saved Jobs — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">💾 Saved Jobs</h1>
+      <p class="page-sub">{{ saved_jobs|length }} saved job{{ 's' if saved_jobs|length != 1 }}</p>
+    </div>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Find More Jobs →</a>
+  </div>
+
+  {% if saved_jobs %}
+  <div class="jobs-list">
+    {% for job in saved_jobs %}
+    <div class="job-card">
+      <div class="jc-top">
+        <div class="jc-icon">💼</div>
+        <div class="jc-meta">
+          <div class="jc-title">{{ job.get('title','—') }}</div>
+          <div class="jc-company">{{ job.get('company','—') }} · {{ job.get('location','—') }}</div>
+          <div class="jc-chips">
+            <span class="chip chip-gray">{{ job.get('category','—') }}</span>
+            <span class="chip chip-gray">{{ job.get('experience_required','—') }}</span>
+            <span class="chip chip-gray">{{ job.get('job_type','—') }}</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="jc-salary">💰 {{ job.get('salary_range','—') }}</div>
+          <div style="font-size:12px;color:#90A4AE;margin-top:4px">Saved {{ job.get('saved_at','')[:10] }}</div>
+        </div>
+      </div>
+      <div class="jc-desc">{{ job.get('description','') }}</div>
+      <div class="jc-footer">
+        <div></div>
+        <div class="jc-actions">
+          <button class="btn-save saved" onclick="unsave(this, {{ job.get('job_id',0) }})">💾 Saved</button>
+          <button class="btn btn-primary btn-sm"
+                  onclick="applyJob({{ job.get('job_id',0) }}, '{{ job.get('title','') }}', '{{ job.get('company','') }}', this)">
+            Apply Now →
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔖</div>
+    <h3>No saved jobs yet</h3>
+    <p>Browse recommendations and click "Save" to bookmark jobs for later.</p>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Get Recommendations →</a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+function unsave(btn, jobId) {
+  fetch('/unsave_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  }).then(() => btn.closest('.job-card').remove());
+}
+function applyJob(jobId, title, company, btn) {
+  fetch('/apply_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId, title, company})
+  }).then(r => r.json()).then(d => {
+    btn.textContent = '✅ Applied'; btn.disabled = true;
+  });
+}
+</script>
+{% endblock %}
