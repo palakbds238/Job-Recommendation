@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ⚡ CareerAI — ML-Based Job Recommendation System
 
 > A complete Machine Learning project for College Submission  
@@ -280,3 +281,6 @@ python app.py
 ---
 
 *Built for college project submission — Computer Science / Data Science Department*
+=======
+# Job-Recommendation
+>>>>>>> bc1bca8369c554a3be9b656cdc65531366ba301b
