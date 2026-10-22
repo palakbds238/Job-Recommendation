@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% from "_pagination.html" import pager %}
+{% block title %}Search Jobs — CareerAI{% endblock %}
+{% block meta_description %}Search jobs by title, skill, company, category or city and filter by experience, type and salary.{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1 class="page-title">🔍 Search Jobs</h1>
+    <p class="page-sub">Search across {{ total_jobs }}+ job listings by title, company, skill, category or city</p>
+  </div>
+
+  <div class="card">
+    <form method="GET" action="{{ url_for('search') }}" class="search-form">
+      <div class="search-row">
+        <input type="text" name="q" class="search-input" value="{{ query }}" aria-label="Search jobs"
+               placeholder="e.g. Data Scientist, Python Developer, Bangalore, React..." maxlength="100" autofocus>
+        <button type="submit" class="btn btn-primary btn-lg">Search →</button>
+      </div>
+      <div class="filter-row search-filters">
+        <div class="filter-item"><label for="f-cat">Category</label>
+          <select id="f-cat" name="category" class="form-input-sm"><option value="">All categories</option>
+            {% for c in categories %}<option value="{{ c }}" {% if f.category|lower == c|lower %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+        <div class="filter-item"><label for="f-loc">Location</label>
+          <input id="f-loc" type="text" name="location" class="form-input-sm" list="s-locs" value="{{ f.location }}" placeholder="Any city" autocomplete="off">
+          <datalist id="s-locs">{% for l in locations %}<option value="{{ l }}">{% endfor %}</datalist></div>
+        <div class="filter-item"><label for="f-exp">Experience</label>
+          <select id="f-exp" name="experience" class="form-input-sm"><option value="">Any level</option>
+            {% for e in experience_levels %}<option value="{{ e }}" {% if f.experience == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+        <div class="filter-item"><label for="f-type">Job type</label>
+          <select id="f-type" name="job_type" class="form-input-sm"><option value="">Any type</option>
+            {% for j in job_types %}<option value="{{ j }}" {% if f.job_type == j %}selected{% endif %}>{{ j }}</option>{% endfor %}</select></div>
+        <div class="filter-item"><label for="f-sal">Min salary (LPA)</label>
+          <input id="f-sal" type="number" name="min_salary" min="0" step="1" class="form-input-sm" value="{{ f.min_salary }}" placeholder="e.g. 10"></div>
+        <div class="filter-item"><label for="f-sort">Sort by</label>
+          <select id="f-sort" name="sort" class="form-input-sm">
+            {% for key, label in sorts.items() %}<option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <a href="{{ url_for('search') }}" class="btn btn-outline">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  {% if searched %}
+  <div class="section-head">
+    <h2 class="section-title">
+      {% if pg.total %}{{ pg.total }} job{{ 's' if pg.total != 1 }} found{% if query %} for “{{ query }}”{% endif %}
+      {% else %}No jobs found{% if query %} for “{{ query }}”{% endif %}{% endif %}
+    </h2>
+  </div>
+  {% if active %}
+  <div class="active-filters">{% for a in active %}<a class="chip chip-blue" href="{{ a.url }}" title="Remove this filter">{{ a.label }} ✕</a>{% endfor %}</div>
+  {% endif %}
+
+  {% if not results %}
+  <script>
+  window.addEventListener('DOMContentLoaded', function () {
+    showPopup({
+      icon: '🔍',
+      title: 'No jobs found',
+      message: {{ (('We could not find anything for “' ~ query ~ '”. ' if query else 'No jobs match those filters. ') ~ 'This app searches job titles, skills, companies, categories and cities — try something like Python, Data Analyst or ' ~ (top_locations[0] if top_locations else 'Pune') ~ ', or remove a filter.')|tojson }},
+      actions: [{label: 'Try another search', primary: true, focus: '.search-input'},
+                {label: 'Clear filters', href: {{ url_for('search')|tojson }}},
+                {label: 'Browse recommendations', href: {{ url_for('recommendations', location='')|tojson }}}]
+    });
+  });
+  </script>
+  <div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>No results found</h3>
+    <p>Try different keywords or remove a filter. <a href="{{ url_for('search') }}">Clear all filters</a></p>
+  </div>
+  {% else %}
+  <div class="jobs-list">
+    {% for job in results %}
+    <div class="job-card">
+      <div class="jc-top">
+        <div class="jc-icon">💼</div>
+        <div class="jc-meta">
+          <div class="jc-title"><a href="{{ url_for('job_detail', job_id=job.get('job_id',0)) }}">{{ job.get('title','') }}</a></div>
+          <div class="jc-company">{{ job.get('company','') }} · {{ job.get('location','') }}</div>
+          <div class="jc-chips">
+            <span class="chip chip-gray">{{ job.get('category','') }}</span>
+            <span class="chip chip-gray">{{ job.get('experience_required','') }}</span>
+            {% if job.get('source') not in ('dataset', 'admin', None) %}<span class="chip chip-gray">🌐 Live · {{ job.get('source')|capitalize }}</span>{% endif %}
+          </div>
+        </div>
+        <div class="jc-salary">💰 {{ job.get('salary_range','') }}</div>
+      </div>
+      <div class="jc-desc">{{ job.get('description','')[:260] }}{% if job.get('description','')|length > 260 %}…{% endif %}</div>
+      <div class="skills-req">
+        <strong>Skills Required:</strong>
+        {% for sk in job.get('skills_required','').split(',') if sk.strip() %}
+        <span class="chip chip-blue">{{ sk.strip() }}</span>
+        {% endfor %}
+      </div>
+      <div class="jc-footer">
+        <span class="chip chip-gray">{{ job.get('job_type','') }}</span>
+        <div class="jc-actions">
+          <a class="btn btn-outline btn-sm" href="{{ url_for('job_detail', job_id=job.get('job_id',0)) }}">Details</a>
+          <button class="btn-save" onclick="saveJob(this, {{ job.get('job_id',0) }})">🔖 Save</button>
+          <button class="btn btn-primary btn-sm" onclick="applyJob({{ job.get('job_id',0) }}, this)">Apply →</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {{ pager(pg, 'search', qargs) }}
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🔎</div>
+    <h3>Start your search</h3>
+    <p>Enter a job title, skill, company or city above — or browse by category.</p>
+    <div class="search-suggestions">
+      <strong>Browse categories:</strong>
+      {% for cat, n in top_categories %}<a href="{{ url_for('search', category=cat) }}" class="chip chip-blue">{{ cat }} ({{ n }})</a>{% endfor %}
+    </div>
+    <div class="search-suggestions">
+      <strong>Popular searches:</strong>
+      {% for s in ['Python Developer','Data Scientist','React Developer','Machine Learning','Remote'] %}
+      <a href="{{ url_for('search', q=s) }}" class="chip chip-blue">{{ s }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+<script>
+function saveJob(btn, jobId) {
+  fetch('/save_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  }).then(() => { btn.innerHTML = '💾 Saved'; btn.classList.add('saved'); });
+}
+function applyJob(jobId, btn) {
+  fetch('/apply_job', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({job_id: jobId})
+  }).then(r => r.json()).then(d => { btn.textContent = '✅ Applied'; btn.disabled = true; });
+}
+</script>
+{% endblock %}

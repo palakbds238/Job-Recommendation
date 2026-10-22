@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Terms of use — CareerAI{% endblock %}
+{% block meta_description %}The rules for using CareerAI.{% endblock %}
+{% block content %}
+<article class="card page-article">
+  <h1>Terms of use</h1>
+  <p class="updated">Last updated: {{ current_year }}</p>
+  <p class="lede">By creating an account you agree to the following.</p>
+
+  <h2>Your account</h2>
+  <p>Provide accurate information, keep your password private, and tell us if you suspect unauthorised use. You are responsible for activity under your account.</p>
+
+  <h2>Acceptable use</h2>
+  <ul>
+    <li>Do not upload unlawful, misleading or malicious content, or someone else's personal data.</li>
+    <li>Do not attempt to break, overload or scrape the service, or access other users' data.</li>
+    <li>Credentials may only be requested for qualifications you genuinely hold.</li>
+  </ul>
+
+  <h2>Job information</h2>
+  <p>Listings come from a sample dataset, administrators and third-party providers. We do not guarantee that a job is current, accurate or open. Match scores and recommendations are guidance only and are not an offer, promise or prediction of employment.</p>
+
+  <h2>Credentials and blockchain</h2>
+  <p>A credential shows that an authorised issuer recorded it; it does not prove the issuer's honesty. Development and demo deployments may use a simulated blockchain that resets.</p>
+
+  <h2>No warranty</h2>
+  <p>The service is provided "as is" as a college project, without warranties of any kind, and we are not liable for losses arising from its use, to the extent permitted by law.</p>
+
+  <h2>Ending your use</h2>
+  <p>You can delete your account at any time from <a href="{{ url_for('account') }}">Account</a>. We may suspend accounts that break these terms.</p>
+
+  <div class="callout">These terms are a template for a college project. Have them reviewed before offering the service publicly.</div>
+</article>
+{% endblock %}

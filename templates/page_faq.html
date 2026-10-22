@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}FAQ & Contact — CareerAI{% endblock %}
+{% block meta_description %}Answers to common questions about matching, credentials, accounts and data — plus how to contact us.{% endblock %}
+{% block content %}
+<article class="card page-article faq">
+  <h1>FAQ &amp; contact</h1>
+  <p class="lede">Quick answers to the questions we hear most.</p>
+
+  <details><summary>How is my match percentage calculated?</summary>
+    <p>It is a weighted mix of the share of required skills you have, how similar your profile is to the job text, and how well the job's category fits your profile. Verified skills add a small bonus. Open any recommendation to see the breakdown.</p></details>
+  <details><summary>Why do I see no jobs in my city?</summary>
+    <p>Recommendations show jobs in your preferred location. If none exist there yet you will see a notice with options: show all locations or include remote jobs. Administrators can add jobs or sync live listings for your city.</p></details>
+  <details><summary>What is a verified credential?</summary>
+    <p>A certificate issued to you by an authorised issuer, whose fingerprint is stored on a blockchain. It lets recruiters confirm it is genuine and not revoked. See <a href="{{ url_for('verify_form') }}">Verify a credential</a>.</p></details>
+  <details><summary>Does the blockchain store my personal data?</summary>
+    <p>No. Only a salted hash is stored; your details stay in our database. Deleting your account removes your details and the salt, which makes the remaining hash unlinkable to you.</p></details>
+  <details><summary>I forgot my password.</summary>
+    <p>Use <a href="{{ url_for('forgot_password') }}">Forgot password</a> on the sign-in page. You will receive a link that expires after one hour.</p></details>
+  <details><summary>How do I download or delete my data?</summary>
+    <p>Sign in and open <em>Account</em> (click your name in the menu). You can export everything we hold as a file, or permanently delete your account.</p></details>
+  <details><summary>Does applying here submit my application to the employer?</summary>
+    <p>Applying records your application, tracks its status and stores a tamper-evident proof. For live listings, use the "Apply on …" button to reach the employer's own application page.</p></details>
+
+  <h2>Contact</h2>
+  {% if site_contact_email %}
+  <p>Questions, bug reports or data requests: <a href="mailto:{{ site_contact_email }}">{{ site_contact_email }}</a></p>
+  {% else %}
+  <p>For questions, bug reports or data requests, please contact the site administrator.</p>
+  {% endif %}
+</article>
+{% endblock %}

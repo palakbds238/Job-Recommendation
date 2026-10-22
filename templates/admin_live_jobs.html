@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Live Jobs — Admin{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🌐 Live Job Data</h1>
+      <p class="page-sub">{{ total }} live jobs in the pool · listings expire after {{ ttl }} days (jobs users saved or applied to are kept) · cap {{ max_jobs }}</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:0;margin-bottom:24px">
+    <table class="data-table">
+      <thead><tr><th>Provider</th><th>Status</th><th>Jobs stored</th><th>Min. gap</th><th>Last sync</th><th></th></tr></thead>
+      <tbody>
+      {% for p in providers %}
+        <tr>
+          <td><strong>{{ p.label }}</strong><div style="font-size:11px;opacity:.7">{{ p.attribution }}</div></td>
+          <td>{% if p.configured %}<span class="chip chip-green">configured</span>
+              {% else %}<span class="chip chip-red">API key missing</span>{% endif %}
+              {% if not p.needs_key %}<div style="font-size:11px;opacity:.7">no key needed</div>{% endif %}</td>
+          <td>{{ p.count }}</td>
+          <td>{{ p.interval }} h</td>
+          <td>{% if p.last %}{{ p.last.finished_at[:16].replace('T',' ') }} UTC<br>
+              <span class="chip {% if p.last.status == 'ok' %}chip-green{% elif p.last.status == 'skipped' %}chip-gray{% else %}chip-red{% endif %}">{{ p.last.status }}</span>
+              {% else %}—{% endif %}</td>
+          <td>
+            {% if p.count %}
+            <form method="POST" action="{{ url_for('admin_live_purge') }}" style="display:inline" onsubmit="return confirm('Remove stored {{ p.label }} jobs?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="provider" value="{{ p.name }}">
+              <button class="btn btn-sm btn-outline" type="submit" style="color:#B71C1C">Clear</button>
+            </form>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="padding:20px;margin-bottom:24px">
+    <h3 style="margin-bottom:12px">Sync now</h3>
+    <form method="POST" action="{{ url_for('admin_live_sync') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid-2">
+        <div class="form-group full-width"><label>Search queries (comma separated)</label>
+          <input type="text" name="queries" class="form-input" value="{{ queries }}">
+          <small style="opacity:.7">Defaults mix common roles with the skills your own users list most often.</small></div>
+        <div class="form-group"><label>Location (optional)</label>
+          <input type="text" name="location" class="form-input" placeholder="e.g. Indore"></div>
+        <div class="form-group"><label>Providers</label>
+          <div>{% for p in providers %}
+            <label style="margin-right:14px"><input type="checkbox" name="provider" value="{{ p.name }}" {% if p.configured %}checked{% endif %}> {{ p.label }}</label>
+          {% endfor %}</div></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Fetch live jobs</button></div>
+    </form>
+    <p style="font-size:12px;opacity:.7;margin-top:12px">
+      Each provider enforces a minimum gap between syncs to respect its API terms and quota.
+      For scheduled updates run <code>python sync_jobs.py</code> from cron or a scheduler instead of clicking here.
+    </p>
+  </div>
+
+  <div class="card" style="padding:0">
+    <table class="data-table">
+      <thead><tr><th>When (UTC)</th><th>Provider</th><th>Status</th><th>Fetched</th><th>New</th><th>Updated</th><th>Removed</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for l in logs %}
+        <tr>
+          <td>{{ (l.finished_at or '')[:16].replace('T',' ') }}</td><td>{{ l.source }}</td>
+          <td><span class="chip {% if l.status == 'ok' %}chip-green{% elif l.status == 'skipped' %}chip-gray{% else %}chip-red{% endif %}">{{ l.status }}</span></td>
+          <td>{{ l.fetched }}</td><td>{{ l.inserted }}</td><td>{{ l.updated }}</td><td>{{ l.pruned }}</td>
+          <td style="font-size:12px">{{ l.message }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" style="text-align:center;opacity:.7;padding:24px">No syncs yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

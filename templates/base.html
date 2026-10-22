@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}CareerAI — ML Job Recommender{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}CareerAI matches your skills to jobs with machine learning, shows exactly which skills you are missing, and lets issuers verify your credentials on a blockchain.{% endblock %}">
+    <meta property="og:site_name" content="CareerAI">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ self.title()|striptags|trim }}">
+    <meta property="og:description" content="{{ self.meta_description()|striptags|trim }}">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/glass.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+    <meta name="theme-color" content="#dbe2ff">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ─── NAVBAR ──────────────────────────────────────────────────────────── -->
+<a class="skip-link" href="#main">Skip to main content</a>
+<nav class="navbar" aria-label="Main">
+  <div class="nav-inner">
+    <a class="nav-brand" href="{{ url_for('home') }}">
+      <span class="brand-icon">⚡</span>
+      Career<span class="brand-accent">AI</span>
+    </a>
+
+    <button type="button" class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">☰</button>
+    <div class="nav-links" id="navLinks">
+      {% if session.get('user_id') %}
+        {% if session.get('is_admin') %}
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+          <a href="{{ url_for('admin_analytics') }}" class="nav-link">Analytics</a>
+          <a href="{{ url_for('admin_jobs') }}" class="nav-link">Manage Jobs</a>
+          <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
+          <a href="{{ url_for('admin_applications') }}" class="nav-link {% if request.endpoint == 'admin_applications' %}active{% endif %}">Applicants</a>
+          <a href="{{ url_for('admin_credentials') }}" class="nav-link {% if request.endpoint == 'admin_credentials' %}active{% endif %}">Credentials</a>
+          <a href="{{ url_for('admin_live_jobs') }}" class="nav-link {% if request.endpoint == 'admin_live_jobs' %}active{% endif %}">Live Jobs</a>
+        {% else %}
+          <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
+          <a href="{{ url_for('recommendations') }}" class="nav-link {% if request.endpoint == 'recommendations' %}active{% endif %}">Jobs</a>
+          <a href="{{ url_for('saved_jobs') }}" class="nav-link">Saved</a>
+          <a href="{{ url_for('applied_jobs') }}" class="nav-link {% if request.endpoint == 'applied_jobs' %}active{% endif %}">Applied{% if nav_updates %}<span class="nav-badge" title="{{ nav_updates }} recruiter update(s)">{{ nav_updates }}</span>{% endif %}</a>
+          <a href="{{ url_for('my_credentials') }}" class="nav-link {% if request.endpoint == 'my_credentials' %}active{% endif %}">🔗 Credentials</a>
+          <a href="{{ url_for('search') }}" class="nav-link">Search</a>
+        {% endif %}
+        <div class="nav-user">
+          <a href="{{ url_for('account') }}" class="nav-account" title="Account settings">
+            <span class="user-avatar">{{ session.get('user_name','U')[0].upper() }}</span>
+            <span class="user-name">{{ session.get('user_name','') }}</span>
+          </a>
+          <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+      {% else %}
+        <a href="{{ url_for('verify_form') }}" class="nav-link">Verify</a>
+        <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-nav-cta">Get Started</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- ─── FLASH MESSAGES ───────────────────────────────────────────────────── -->
+<div class="flash-container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}
+      <button onclick="this.parentElement.remove()">×</button>
+    </div>
+  {% endfor %}
+{% endwith %}
+</div>
+
+<!-- ─── PAGE CONTENT ─────────────────────────────────────────────────────── -->
+<main id="main">{% block content %}{% endblock %}</main>
+
+<!-- ─── FOOTER ──────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand footer-inner">
+      <p>⚡ <strong>CareerAI</strong></p>
+      <p>Machine-learning job matching with skill-gap analysis and blockchain-verified credentials.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="{{ url_for('recommendations') }}">Job recommendations</a>
+      <a href="{{ url_for('search') }}">Search jobs</a>
+      <a href="{{ url_for('verify_form') }}">Verify a credential</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="{{ url_for('about') }}">About</a>
+      <a href="{{ url_for('faq') }}">FAQ &amp; contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="{{ url_for('privacy') }}">Privacy policy</a>
+      <a href="{{ url_for('terms') }}">Terms of use</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© {{ current_year }} CareerAI. College project — Computer Science Department.</span>
+    <span>Python · Flask · scikit-learn · Solidity</span>
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/site.js') }}"></script>
+<script>
+/* attach the CSRF token to every same-origin non-GET fetch() */
+(function () {
+  const token = document.querySelector('meta[name="csrf-token"]').content;
+  const orig = window.fetch;
+  window.fetch = function (url, opts) {
+    opts = opts || {};
+    const m = (opts.method || 'GET').toUpperCase();
+    if (m !== 'GET' && m !== 'HEAD') {
+      opts.headers = Object.assign({}, opts.headers || {}, {'X-CSRFToken': token});
+    }
+    return orig(url, opts);
+  };
+})();
+</script>
+{% block extra_js %}{% endblock %}
+<!-- Reusable pop-up (not-found, empty results…). Text is set with textContent, never innerHTML. -->
+<div id="appModal" class="app-modal" hidden>
+  <div class="app-modal-box" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+    <div class="app-modal-icon" id="appModalIcon">🔍</div>
+    <h3 id="appModalTitle"></h3>
+    <p id="appModalMsg"></p>
+    <div class="app-modal-actions" id="appModalActions"></div>
+  </div>
+</div>
+<script>
+function closePopup() { document.getElementById('appModal').hidden = true; }
+function showPopup(o) {
+  var m = document.getElementById('appModal');
+  document.getElementById('appModalIcon').textContent = o.icon || '🔍';
+  document.getElementById('appModalTitle').textContent = o.title || '';
+  document.getElementById('appModalMsg').textContent = o.message || '';
+  var box = document.getElementById('appModalActions');
+  box.textContent = '';
+  (o.actions || [{label: 'OK'}]).forEach(function (a) {
+    var el = document.createElement(a.href ? 'a' : 'button');
+    el.className = 'btn ' + (a.primary ? 'btn-primary' : 'btn-outline');
+    el.textContent = a.label;
+    if (a.href) { el.href = a.href; } else { el.type = 'button'; el.onclick = function () { closePopup(); if (a.focus) { var f = document.querySelector(a.focus); if (f) f.focus(); } }; }
+    box.appendChild(el);
+  });
+  m.hidden = false;
+  var first = box.firstChild; if (first) first.focus();
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePopup(); });
+document.getElementById('appModal').addEventListener('click', function (e) { if (e.target === this) closePopup(); });
+</script>
+{% if live_sources %}
+<div class="live-attribution" style="text-align:center;font-size:12px;opacity:.75;padding:14px 10px">
+  Live job listings:
+  {% if 'adzuna' in live_sources %}<a href="https://www.adzuna.com" target="_blank" rel="noopener noreferrer">Jobs by Adzuna</a>{% endif %}
+  {% if 'remotive' in live_sources %}{% if 'adzuna' in live_sources %} · {% endif %}<a href="https://remotive.com" target="_blank" rel="noopener noreferrer">Remote jobs from Remotive</a>{% endif %}
+</div>
+{% endif %}
+</body>
+</html>

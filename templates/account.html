@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Account settings — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">⚙️ Account settings</h1>
+      <p class="page-sub">Manage your sign-in details and your data.</p>
+    </div>
+  </div>
+
+  <div class="account-grid">
+    <section class="card account-card">
+      <h3>Your details</h3>
+      <form method="POST" action="{{ url_for('account_name') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group"><label for="acc-name">Name</label>
+          <input id="acc-name" type="text" name="name" class="form-input" value="{{ user.name }}" required minlength="2" maxlength="60"></div>
+        <div class="form-group"><label>Email</label>
+          <input type="email" class="form-input" value="{{ user.email }}" disabled>
+          <small class="field-hint">Your email is your sign-in ID and can't be changed here.</small></div>
+        <p class="field-hint">Member since {{ (user.created_at or '')[:10] }}</p>
+        <button class="btn btn-primary" type="submit">Save name</button>
+      </form>
+    </section>
+
+    <section class="card account-card">
+      <h3>Change password</h3>
+      <form method="POST" action="{{ url_for('account_password') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group"><label for="acc-cur">Current password</label>
+          <input id="acc-cur" type="password" name="current_password" class="form-input" required autocomplete="current-password"></div>
+        <div class="form-group"><label for="acc-new">New password</label>
+          <input id="acc-new" type="password" name="new_password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></div>
+        <div class="form-group"><label for="acc-conf">Confirm new password</label>
+          <input id="acc-conf" type="password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password"></div>
+        <button class="btn btn-primary" type="submit">Update password</button>
+      </form>
+    </section>
+
+    {% if not user.is_admin %}
+    <section class="card account-card">
+      <h3>Your data</h3>
+      <p class="field-hint">You currently have {{ counts.saved_jobs }} saved job(s), {{ counts.applied_jobs }} application(s) and {{ counts.credentials }} credential(s).</p>
+      <p>Download everything we hold about you (profile, saved jobs, applications and credentials) as a JSON file.</p>
+      <a class="btn btn-outline" href="{{ url_for('account_export') }}">⬇ Download my data</a>
+    </section>
+
+    <section class="card account-card danger-zone">
+      <h3>Delete account</h3>
+      <p>This permanently deletes your profile, resume, saved jobs, applications and credentials. It can't be undone.</p>
+      <form method="POST" action="{{ url_for('account_delete') }}" onsubmit="return confirm('Permanently delete your account and all data?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group"><label for="del-pw">Password</label>
+          <input id="del-pw" type="password" name="password" class="form-input" required autocomplete="current-password"></div>
+        <div class="form-group"><label for="del-conf">Type <strong>DELETE</strong> to confirm</label>
+          <input id="del-conf" type="text" name="confirm" class="form-input" required autocomplete="off" pattern="DELETE"></div>
+        <button class="btn btn-danger" type="submit">Delete my account</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

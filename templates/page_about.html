@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}About — CareerAI{% endblock %}
+{% block meta_description %}How CareerAI matches candidates to jobs with machine learning, collaborative filtering and blockchain-verified credentials.{% endblock %}
+{% block content %}
+<article class="card page-article">
+  <h1>About CareerAI</h1>
+  <p class="lede">A job-matching platform that explains <em>why</em> a job fits you, shows which skills you are missing, and lets issuers prove your credentials without exposing your data.</p>
+
+  <h2>How matching works</h2>
+  <ul>
+    <li><strong>Skills first.</strong> Every job is scored on how many of its required skills you have. Skills are normalised, so "JS" matches "JavaScript".</li>
+    <li><strong>Text and meaning.</strong> Your profile and resume are compared with each job description (TF-IDF similarity, and optional sentence embeddings).</li>
+    <li><strong>Category fit.</strong> A Random Forest model predicts which job category suits your profile.</li>
+    <li><strong>People like you.</strong> Collaborative filtering uses what similar users saved or applied to — it stays quiet until there is enough data.</li>
+    <li><strong>Transparent.</strong> Each recommendation shows the score breakdown and the reason it was suggested.</li>
+  </ul>
+
+  <h2>Verified credentials</h2>
+  <p>An authorised issuer (for example a university) can issue a credential to you. Only a salted fingerprint (hash) is recorded on a blockchain, never your name or documents. Anyone can then check that a credential is genuine and not revoked from its verification link, and skills backed by a valid credential rank higher.</p>
+
+  <h2>Job data</h2>
+  <p>Jobs come from a curated sample dataset, from jobs added by administrators and, when enabled, from live listings provided by Adzuna and Remotive. Live listings link back to the original advertisement.</p>
+
+  <div class="callout">CareerAI is a college project built to demonstrate machine learning and blockchain techniques. Match scores are guidance, not a guarantee of any hiring outcome.</div>
+  <p><a class="btn btn-primary" href="{{ url_for('register') }}">Create your profile</a> &nbsp; <a class="btn btn-outline" href="{{ url_for('faq') }}">Read the FAQ</a></p>
+</article>
+{% endblock %}

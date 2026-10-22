@@ -1,0 +1,19 @@
+{# Usage: {% from "_pagination.html" import pager %}  {{ pager(pg, 'search', qargs) }} #}
+{% macro pager(pg, endpoint, args) %}
+{% if pg.pages > 1 %}
+<nav class="pager" aria-label="Pagination">
+  {% if pg.has_prev %}<a class="pager-btn" rel="prev" href="{{ url_for(endpoint, **dict(args, page=pg.page - 1)) }}">← Previous</a>
+  {% else %}<span class="pager-btn disabled">← Previous</span>{% endif %}
+  <span class="pager-numbers">
+    {% for n in pg.numbers %}
+      {% if n is none %}<span class="pager-gap">…</span>
+      {% elif n == pg.page %}<span class="pager-num current" aria-current="page">{{ n }}</span>
+      {% else %}<a class="pager-num" href="{{ url_for(endpoint, **dict(args, page=n)) }}">{{ n }}</a>{% endif %}
+    {% endfor %}
+  </span>
+  {% if pg.has_next %}<a class="pager-btn" rel="next" href="{{ url_for(endpoint, **dict(args, page=pg.page + 1)) }}">Next →</a>
+  {% else %}<span class="pager-btn disabled">Next →</span>{% endif %}
+</nav>
+<p class="pager-info">Showing {{ pg.start + 1 }}–{{ pg.end }} of {{ pg.total }}</p>
+{% endif %}
+{% endmacro %}

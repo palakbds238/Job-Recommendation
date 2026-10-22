@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — CareerAI{% endblock %}
+{% block content %}
+<div class="error-wrap">
+  <div class="card error-card">
+    <div class="error-code">{{ code }}</div>
+    <h2>{{ title }}</h2>
+    <p>{{ msg }}</p>
+    <div class="error-actions">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('admin_dashboard' if session.get('is_admin') else 'dashboard') }}" class="btn btn-primary">Go to dashboard</a>
+      {% else %}
+        <a href="{{ url_for('home') }}" class="btn btn-primary">Go home</a>
+      {% endif %}
+      <button type="button" onclick="history.back()" class="btn btn-outline">Go back</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

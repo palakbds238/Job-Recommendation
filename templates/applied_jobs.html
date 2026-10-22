@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "_pagination.html" import pager %}
+{% block title %}My Applications — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">✅ My Applications</h1>
+      <p class="page-sub">Track every application from applied to offer. {{ total }} total.</p>
+    </div>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Find More Jobs →</a>
+  </div>
+
+  {% if total %}
+  <div class="status-tabs" role="tablist">
+    <a class="status-tab {{ 'active' if not status }}" href="{{ url_for('applied_jobs') }}">All <b>{{ total }}</b></a>
+    {% for st in statuses %}<a class="status-tab {{ 'active' if status == st }}" href="{{ url_for('applied_jobs', status=st) }}">{{ st }} <b>{{ counts.get(st, 0) }}</b></a>{% endfor %}
+  </div>
+
+  {% if apps %}
+  <div class="app-list">
+    {% for a in apps %}
+    {% set st = a.status or 'Applied' %}
+    <article class="card app-card" id="app-{{ a.id }}" data-id="{{ a.id }}">
+      <div class="app-main">
+        <div class="app-info">
+          <h3 class="app-title">
+            {% if a.id in info %}<a href="{{ url_for('job_detail', job_id=a.job_id) }}">{{ a.job_title }}</a>{% else %}{{ a.job_title }}{% endif %}
+            {% if a.id in unseen %}<span class="chip chip-red">New update</span>{% endif %}
+          </h3>
+          <div class="app-meta">{{ a.company }} · Applied {{ (a.applied_at or '')[:10] }}</div>
+          {% if a.status_by == 'recruiter' and a.status_updated_at %}<div class="app-meta">Set by the recruiter on {{ a.status_updated_at[:10] }}</div>{% endif %}
+        </div>
+        <div class="app-status">
+          <span class="status-pill st-{{ st|lower }}" data-pill>{{ st }}</span>
+          <select class="form-input-sm" aria-label="Change status" onchange="setStatus({{ a.id }}, this)">
+            {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == st }}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="app-extra">
+        <textarea class="form-input app-notes" rows="2" maxlength="1000" placeholder="Private notes — interviewer, follow-up date, salary talk…" aria-label="Notes">{{ a.notes or '' }}</textarea>
+        <div class="app-actions">
+          <button type="button" class="btn btn-outline btn-sm" onclick="saveNotes({{ a.id }}, this)">Save notes</button>
+          {% if a.tx_hash %}<span class="chip chip-purple" title="Transaction {{ a.tx_hash }}">🔗 Proof recorded · block {{ a.block_number }}</span>
+          {% else %}<span class="chip chip-gray">Not anchored</span>{% endif %}
+          {% if a.id in info and info[a.id].url and info[a.id].url.startswith(('http://', 'https://')) %}
+          <a class="btn btn-outline btn-sm" href="{{ info[a.id].url }}" target="_blank" rel="noopener noreferrer nofollow">Open posting ↗</a>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {{ pager(pg, 'applied_jobs', qargs) }}
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">📭</div><h3>No {{ status|lower }} applications</h3>
+    <p><a href="{{ url_for('applied_jobs') }}">Show all applications</a></p></div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">📝</div><h3>No applications yet</h3>
+    <p>When you apply to a job it appears here so you can track it through to an offer.</p>
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary">Browse recommended jobs</a></div>
+  {% endif %}
+</div>
+
+<script>
+function post(id, body) {
+  return fetch('/application/' + id + '/update', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
+    .then(function (r) { return r.json(); });
+}
+function setStatus(id, sel) {
+  var pill = document.querySelector('#app-' + id + ' [data-pill]');
+  post(id, {status: sel.value}).then(function (d) {
+    if (d.status === 'ok') { pill.textContent = sel.value; pill.className = 'status-pill st-' + sel.value.toLowerCase(); showToast('Status updated to ' + sel.value); }
+    else { showToast(d.message || 'Could not update'); }
+  });
+}
+function saveNotes(id, btn) {
+  var ta = document.querySelector('#app-' + id + ' .app-notes');
+  post(id, {notes: ta.value}).then(function (d) { showToast(d.status === 'ok' ? 'Notes saved' : (d.message || 'Could not save')); });
+}
+</script>
+{% endblock %}

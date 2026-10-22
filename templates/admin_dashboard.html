@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — CareerAI{% endblock %}
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">👨‍💼 Admin Dashboard</h1>
+      <p class="page-sub">System overview and analytics</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="{{ url_for('admin_jobs') }}" class="btn btn-primary">Manage Jobs</a>
+      <a href="{{ url_for('admin_users') }}" class="btn btn-outline">Manage Users</a>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">💼</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ total_jobs }}</div>
+        <div class="stat-label">Total Jobs</div>
+      </div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon">💾</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ total_saved }}</div>
+        <div class="stat-label">Jobs Saved</div>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">✅</div>
+      <div class="stat-body">
+        <div class="stat-num">{{ total_applied }}</div>
+        <div class="stat-label">Applications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-head"><h2>📊 Jobs by Category</h2></div>
+      <canvas id="catChart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>📍 Jobs by Location</h2></div>
+      <canvas id="locChart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>⏱ Jobs by Experience</h2></div>
+      <canvas id="expChart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>👥 Recent Users</h2></div>
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead>
+        <tbody>
+          {% for u in recent_users %}
+          <tr>
+            <td>{{ u.name }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.created_at[:10] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#1A73E8','#00897B','#F9A825','#E53935','#8E24AA',
+                '#0288D1','#388E3C','#F57C00','#5E35B1','#D81B60'];
+
+// Category Chart
+const catData = {{ cat_stats|safe }};
+new Chart(document.getElementById('catChart'), {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(catData),
+    datasets: [{data: Object.values(catData), backgroundColor: COLORS, borderWidth: 2}]
+  },
+  options: {responsive:true, plugins:{legend:{position:'right', labels:{font:{size:11}}}}}
+});
+
+// Location Chart
+const locData = {{ loc_stats|safe }};
+new Chart(document.getElementById('locChart'), {
+  type: 'bar',
+  data: {
+    labels: Object.keys(locData),
+    datasets: [{label:'Jobs', data: Object.values(locData), backgroundColor: '#1A73E8', borderRadius: 6}]
+  },
+  options: {
+    responsive: true,
+    plugins: {legend:{display:false}},
+    scales: {y:{beginAtZero:true, ticks:{stepSize:1}}}
+  }
+});
+
+// Experience Chart
+const expData = {{ exp_stats|safe }};
+new Chart(document.getElementById('expChart'), {
+  type: 'pie',
+  data: {
+    labels: Object.keys(expData),
+    datasets: [{data: Object.values(expData), backgroundColor: COLORS, borderWidth: 2}]
+  },
+  options: {responsive:true, plugins:{legend:{position:'bottom', labels:{font:{size:11}}}}}
+});
+</script>
+{% endblock %}

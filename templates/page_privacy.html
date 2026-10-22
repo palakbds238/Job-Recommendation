@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Privacy policy — CareerAI{% endblock %}
+{% block meta_description %}What data CareerAI stores, why, who sees it, and how to export or delete it.{% endblock %}
+{% block content %}
+<article class="card page-article">
+  <h1>Privacy policy</h1>
+  <p class="updated">Last updated: {{ current_year }}</p>
+  <p class="lede">We collect only what is needed to match you with jobs and to run your account.</p>
+
+  <h2>What we store</h2>
+  <ul>
+    <li><strong>Account:</strong> name, email address and a salted password hash (we never store your password).</li>
+    <li><strong>Profile:</strong> skills, experience, education, preferred location, goals and, if you upload one, your resume file and its extracted text.</li>
+    <li><strong>Activity:</strong> jobs you saved or applied to, application status and notes, and credentials issued to you.</li>
+    <li><strong>Technical:</strong> a session cookie that keeps you signed in. We use no advertising or tracking cookies.</li>
+  </ul>
+
+  <h2>How it is used</h2>
+  <p>To rank jobs, show skill gaps, suggest jobs saved by similar users (using only anonymous user and job ids), and verify credentials. Administrators can see account details and applications in order to run the service.</p>
+
+  <h2>Blockchain</h2>
+  <p>Credential and application proofs are recorded as salted hashes only. Blockchain records cannot be deleted; because the hash contains no readable data and the salt is removed with your account, it cannot be linked back to you afterwards.</p>
+
+  <h2>Third parties</h2>
+  <ul>
+    <li>Web fonts (Google Fonts) and chart libraries (jsDelivr) are loaded from their servers, which may see your IP address.</li>
+    <li>When live jobs are enabled, search keywords — never your personal data — are sent to Adzuna and Remotive. Following an "Apply on …" link takes you to the employer's site, which has its own policy.</li>
+    <li>Email (such as password reset) is sent through the mail server configured by the administrator.</li>
+  </ul>
+
+  <h2>Your choices</h2>
+  <p>From <a href="{{ url_for('account') }}">Account</a> you can edit your name, change your password, download all your data, or delete your account and resume permanently.</p>
+
+  <h2>Security</h2>
+  <p>Passwords are hashed with a slow salted algorithm, forms are protected against cross-site request forgery, sign-in attempts are rate-limited and uploaded resumes are stored under unique names.</p>
+
+  <div class="callout">This policy is a plain-language template for a college project. Have it reviewed against the laws that apply to you before using the service with real users.</div>
+</article>
+{% endblock %}

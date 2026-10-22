@@ -1,0 +1,379 @@
+/* ============================================================
+   CareerAI — Glassmorphism theme
+   Loaded AFTER style.css. To go back to the original look, remove the
+   <link> to this file in templates/base.html — nothing else depends on it.
+
+   Recipe: a vivid gradient backdrop + slowly drifting colour orbs, and
+   frosted panels (translucent white + backdrop blur + a bright 1px edge +
+   soft coloured shadow) so the colour shows through every surface.
+   ============================================================ */
+
+/* ── 1. Tokens ────────────────────────────────────────────────
+   The old tokens are re-pointed to translucent values, so every existing
+   component (chips, bars, badges, tables…) turns glassy automatically. */
+:root {
+  --glass-bg:          rgba(255, 255, 255, .44);
+  --glass-bg-soft:     rgba(255, 255, 255, .32);
+  --glass-bg-strong:   rgba(255, 255, 255, .76);
+  --glass-border:      rgba(255, 255, 255, .72);
+  --glass-edge:        inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -1px 0 rgba(255, 255, 255, .25);
+  --glass-shadow:      0 8px 32px rgba(49, 46, 129, .14);
+  --glass-shadow-hover: 0 16px 44px rgba(49, 46, 129, .24);
+  --blur:              blur(16px) saturate(190%);
+  --blur-strong:       blur(24px) saturate(185%);
+
+  --accent:            #5b5ff0;
+  --accent-dark:       #4338ca;
+  --grad-accent:       linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #d946ef 100%);
+
+  --off-white:         rgba(255, 255, 255, .34);
+  --border:            rgba(255, 255, 255, .75);
+  --text-3:            #64748b;
+  --blue:              #5b5ff0;
+  --blue-light:        rgba(99, 102, 241, .14);
+  --green-light:       rgba(16, 185, 129, .17);
+  --gold-light:        rgba(251, 191, 36, .26);
+  --red-light:         rgba(244, 63, 94, .14);
+  --purple-light:      rgba(168, 85, 247, .17);
+  --slate-light:       rgba(100, 116, 139, .15);
+  --shadow:            0 4px 24px rgba(49, 46, 129, .10);
+  --shadow-lg:         0 10px 40px rgba(49, 46, 129, .20);
+}
+
+/* ── 2. Backdrop: gradient mesh + drifting orbs ─────────────── */
+html { background: #dbe2ff; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1000px 700px at 6% -8%,   #a5b4fc 0%, transparent 62%),
+    radial-gradient(900px 650px at 100% 6%,   #f9a8d4 0%, transparent 58%),
+    radial-gradient(800px 700px at 50% 55%,   rgba(196, 181, 253, .75) 0%, transparent 62%),
+    radial-gradient(1000px 800px at 92% 102%, #67e8f9 0%, transparent 58%),
+    radial-gradient(900px 700px at -4% 104%,  #fcd34d 0%, transparent 58%),
+    #e0e7ff;
+  background-attachment: fixed;
+}
+body::before, body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .62;
+  pointer-events: none;
+  will-change: transform;
+}
+body::before {
+  width: 540px; height: 540px; top: -140px; left: -120px;
+  background: radial-gradient(circle at 40% 40%, #6366f1, #a78bfa 55%, transparent 72%);
+  animation: orb-a 28s ease-in-out infinite alternate;
+}
+body::after {
+  width: 620px; height: 620px; bottom: -180px; right: -160px;
+  background: radial-gradient(circle at 55% 45%, #22d3ee, #f472b6 62%, transparent 74%);
+  animation: orb-b 34s ease-in-out infinite alternate;
+}
+@keyframes orb-a { to { transform: translate(20vw, 26vh) scale(1.18); } }
+@keyframes orb-b { to { transform: translate(-18vw, -24vh) scale(1.12); } }
+
+html::before {
+  content: "";
+  position: fixed; z-index: -1; pointer-events: none; will-change: transform;
+  width: 480px; height: 480px; top: 38%; left: 52%;
+  border-radius: 50%; filter: blur(70px); opacity: .5;
+  background: radial-gradient(circle, #8b5cf6, #ec4899 60%, transparent 74%);
+  animation: orb-c 38s ease-in-out infinite alternate;
+}
+@keyframes orb-c { to { transform: translate(-30vw, -16vh) scale(1.2); } }
+@media (prefers-reduced-motion: reduce) { html::before { animation: none; } }
+
+a { color: var(--accent); }
+::selection { background: rgba(99, 102, 241, .28); }
+* { scrollbar-width: thin; scrollbar-color: rgba(99, 102, 241, .45) transparent; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── 3. Navbar ─────────────────────────────────────────────── */
+.navbar {
+  background: rgba(255, 255, 255, .42);
+  -webkit-backdrop-filter: var(--blur-strong);
+  backdrop-filter: var(--blur-strong);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(49, 46, 129, .10);
+}
+.nav-brand { color: var(--navy); }
+.brand-accent {
+  background: var(--grad-accent);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}
+.nav-link { color: var(--text-2); }
+.nav-link:hover, .nav-link.active {
+  color: var(--navy);
+  background: rgba(255, 255, 255, .68);
+  box-shadow: var(--glass-edge);
+}
+.btn-nav-cta {
+  background: var(--grad-accent);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, .35), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.btn-nav-cta:hover { background: var(--grad-accent); filter: brightness(1.07); }
+.user-name { color: var(--navy); }
+.user-avatar { background: var(--grad-accent); border-color: rgba(255, 255, 255, .85); }
+.btn-logout {
+  background: rgba(255, 255, 255, .55);
+  color: var(--text-2);
+  border: 1px solid var(--glass-border);
+}
+.btn-logout:hover { background: rgba(255, 255, 255, .85); color: var(--navy); }
+
+/* ── 4. Glass surfaces ─────────────────────────────────────── */
+.card, .stat-card, .job-card, .feature-card, .step-card, .auth-card, .empty-state,
+.filter-bar, .job-card-preview, .modal-box, .app-modal-box, .profile-summary-bar {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-edge);
+}
+.auth-card, .modal-box, .app-modal-box {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: var(--blur-strong);
+  backdrop-filter: var(--blur-strong);
+}
+.profile-summary-bar { background: rgba(99, 102, 241, .14); }
+.stat-card:hover, .job-card:hover, .feature-card:hover {
+  background: rgba(255, 255, 255, .64);
+  box-shadow: var(--glass-shadow-hover), var(--glass-edge);
+  transform: translateY(-2px);
+}
+.job-card.top-pick {
+  border-color: rgba(251, 191, 36, .85);
+  box-shadow: 0 10px 40px rgba(251, 191, 36, .25), var(--glass-edge);
+}
+.bg-white {
+  background: var(--glass-bg-soft);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-block: 1px solid var(--glass-border);
+}
+.bg-gray { background: transparent; }
+
+/* ── 5. Hero (was dark navy) ───────────────────────────────── */
+.hero { background: transparent; }
+.hero-bg { background: none; }
+.hero-badge {
+  background: rgba(255, 255, 255, .6);
+  color: var(--accent-dark);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: var(--glass-edge);
+}
+.hero-title { color: var(--navy); }
+.gradient-text {
+  background: var(--grad-accent);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
+}
+.hero-sub, .hero-sub strong { color: #334155; }
+.hero-sub strong { color: var(--navy); }
+.hero-stat { color: var(--text-2); }
+.hero-stat span { color: var(--accent-dark); }
+.hero-stat-divider { background: rgba(11, 26, 44, .16); }
+.hero-stats { border-top-color: rgba(11, 26, 44, .12); }
+.job-card-preview { background: var(--glass-bg-strong); box-shadow: 0 24px 60px rgba(49, 46, 129, .25), var(--glass-edge); }
+
+/* call-to-action banner = tinted glass */
+.cta-banner {
+  background: linear-gradient(135deg, rgba(79, 70, 229, .80), rgba(147, 51, 234, .74));
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border-block: 1px solid rgba(255, 255, 255, .35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.cta-banner .btn-primary {
+  background: rgba(255, 255, 255, .92);
+  color: var(--accent-dark);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+}
+.cta-banner .btn-primary:hover { background: #fff; color: var(--accent-dark); filter: none; }
+
+/* ── 6. Buttons ────────────────────────────────────────────── */
+.btn { transition: transform .15s, box-shadow .2s, background .2s, filter .2s; }
+.btn-primary {
+  background: var(--grad-accent);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, .35), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.btn-primary:hover {
+  background: var(--grad-accent);
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, .45), inset 0 1px 0 rgba(255, 255, 255, .35);
+  text-decoration: none;
+}
+.btn-outline {
+  background: rgba(255, 255, 255, .5);
+  color: var(--navy);
+  border: 1.5px solid rgba(255, 255, 255, .95);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: var(--glass-edge), 0 4px 14px rgba(49, 46, 129, .08);
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, .85);
+  color: var(--accent-dark);
+  transform: translateY(-1px);
+}
+.btn-danger {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  box-shadow: 0 6px 18px rgba(225, 29, 72, .30), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.btn-danger:hover { background: linear-gradient(135deg, #f43f5e, #be123c); }
+.btn-save {
+  background: rgba(255, 255, 255, .55);
+  border: 1.5px solid rgba(255, 255, 255, .9);
+  color: var(--text-2);
+}
+.btn-save:hover { background: rgba(255, 255, 255, .9); }
+.btn-save.saved { background: var(--green-light); color: #047857; border-color: rgba(16, 185, 129, .45); }
+
+/* ── 7. Forms ──────────────────────────────────────────────── */
+.form-input, .form-input-sm, .auth-form input, .search-input,
+.filter-item select, .filter-item input[type=text], .filter-item input[type=number] {
+  background-color: rgba(255, 255, 255, .5);   /* background-color, not shorthand: keeps the <select> arrow */
+  border: 1.5px solid rgba(255, 255, 255, .9);
+  color: var(--text);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 3px rgba(49, 46, 129, .07);
+}
+.form-input::placeholder, .form-input-sm::placeholder, .auth-form input::placeholder,
+.search-input::placeholder { color: #7a8aa0; }
+.form-input:focus, .form-input-sm:focus, .auth-form input:focus, .search-input:focus {
+  background-color: rgba(255, 255, 255, .9);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, .20);
+  outline: none;
+}
+.upload-area {
+  background: rgba(255, 255, 255, .28);
+  border: 2px dashed rgba(99, 102, 241, .45);
+}
+.upload-area:hover { background: rgba(255, 255, 255, .6); }
+.auth-demo { background: var(--glass-bg-soft); border: 1px solid var(--glass-border); }
+
+/* ── 8. Tables ─────────────────────────────────────────────── */
+.data-table th { background: rgba(255, 255, 255, .45); color: var(--slate); }
+.data-table td { border-bottom: 1px solid rgba(255, 255, 255, .6); }
+.data-table tr:hover td { background: rgba(255, 255, 255, .5); }
+
+/* ── 9. Chips, bars, badges ────────────────────────────────── */
+.chip, .skill-green, .skill-red, .jcp-badge, .top-pick-badge, .openings-badge {
+  border: 1px solid rgba(255, 255, 255, .8);
+}
+.chip-blue   { color: #4338ca; }
+.chip-purple { color: #7e22ce; }
+.chip-green  { color: #047857; }
+.chip-red    { color: #be123c; }
+.conf-bar, .mb-bar, .jcp-bar {
+  background: rgba(255, 255, 255, .55);
+  box-shadow: inset 0 1px 3px rgba(49, 46, 129, .14);
+}
+.conf-fill { background: var(--grad-accent); }
+.why-rec { color: #4338ca; border: 1px solid rgba(255, 255, 255, .7); }
+.match-circle { box-shadow: var(--glass-edge); }
+.jc-icon { background: rgba(255, 255, 255, .6); border-color: rgba(255, 255, 255, .85); }
+.jcp-icon { background: rgba(99, 102, 241, .16); }
+.step-num { background: var(--grad-accent); box-shadow: 0 4px 12px rgba(99, 102, 241, .4); }
+.ai-badge-inline { background: var(--grad-accent); color: #fff; }
+.qa-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-edge);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.qa-btn:hover { background: rgba(255, 255, 255, .85); color: var(--accent-dark); }
+
+/* "Top Pick" badge used to overlap the match circle: let it sit on the card's top edge */
+.top-pick-badge {
+  top: -11px; right: 26px;
+  background: linear-gradient(135deg, rgba(254, 240, 138, .95), rgba(251, 191, 36, .9));
+  color: #6b4a00;
+  border: 1px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 6px 16px rgba(251, 191, 36, .35);
+}
+.flash { gap: 12px; }
+/* persistent page notice (unlike .flash it is NOT auto-dismissed by main.js) */
+.notice {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 12px 0; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px;
+  background: rgba(224, 231, 255, .72); border: 1px solid rgba(165, 180, 252, .9); color: #3730a3;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: var(--glass-shadow), var(--glass-edge);
+}
+.notice a { font-weight: 600; white-space: nowrap; color: var(--accent-dark); }
+
+/* ── 10. Flash messages, toast, modals ─────────────────────── */
+.flash {
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: var(--glass-shadow), var(--glass-edge);
+}
+.flash-success { background: rgba(220, 252, 231, .70); border-color: rgba(134, 239, 172, .9); }
+.flash-danger  { background: rgba(255, 228, 230, .72); border-color: rgba(253, 164, 175, .9); }
+.flash-warning { background: rgba(254, 249, 195, .72); border-color: rgba(253, 224, 71, .9); }
+.flash-info    { background: rgba(224, 231, 255, .72); border-color: rgba(165, 180, 252, .9); }
+.toast {
+  background: rgba(30, 27, 75, .78);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border: 1px solid rgba(255, 255, 255, .25);
+}
+.modal, .app-modal {
+  background: rgba(30, 27, 75, .32);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.app-modal-box { color: var(--text); }
+@media (prefers-color-scheme: dark) { .app-modal-box { background: var(--glass-bg-strong); color: var(--text); } }
+
+/* ── 11. Footer ────────────────────────────────────────────── */
+.footer {
+  background: rgba(255, 255, 255, .40);
+  -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
+  border-top: 1px solid var(--glass-border);
+  color: var(--text-2);
+}
+.footer-inner, .footer-sub { color: var(--text-2); }
+.footer-inner strong { color: var(--accent-dark); }
+.live-attribution a { color: var(--accent-dark); }
+
+/* ── 12. Dark accent card that a template styles inline ────── */
+.card[style*="background:var(--navy)"] {
+  background: linear-gradient(135deg, rgba(49, 46, 129, .84), rgba(88, 28, 135, .76)) !important;
+  border-color: rgba(255, 255, 255, .3) !important;
+}
+
+/* ── 13. Fallbacks & accessibility ─────────────────────────── */
+/* browsers without backdrop-filter: make surfaces nearly opaque so text stays readable */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root { --glass-bg: rgba(255, 255, 255, .93); --glass-bg-soft: rgba(255, 255, 255, .85); --glass-bg-strong: rgba(255, 255, 255, .97); }
+  .navbar, .footer { background: rgba(255, 255, 255, .96); }
+  .modal, .app-modal { background: rgba(30, 27, 75, .6); }
+}
+/* users who asked for less transparency / motion */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-bg: rgba(255, 255, 255, .95); --glass-bg-soft: rgba(255, 255, 255, .9); --glass-bg-strong: #fff; }
+  .navbar, .footer { background: rgba(255, 255, 255, .97); }
+  * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+  .btn, .card, .job-card, .stat-card, .feature-card { transition: none; }
+}
+/* phones: cheaper blur, still orbs but static */
+@media (max-width: 768px) {
+  :root { --blur: blur(10px) saturate(150%); --blur-strong: blur(14px) saturate(160%); }
+  body::before, body::after { animation: none; filter: blur(50px); }
+}
+
+/* phones: the filter row becomes a column; stretch its fields (it used to right-align them at odd widths) */
+@media (max-width: 600px) {
+  .filter-row { align-items: stretch; }
+  .filter-item, .filter-row .btn { width: 100%; }
+  .filter-item select, .filter-item input[type=text], .filter-item input[type=number] { width: 100%; }
+}

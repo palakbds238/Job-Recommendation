@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Verify Credential — CareerAI{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:760px;margin:0 auto">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🔎 Verify a Credential</h1>
+      <p class="page-sub">Checks the blockchain directly — no login and no need to contact the issuer.</p>
+    </div>
+  </div>
+
+  <div class="card" style="padding:20px;margin-bottom:20px">
+    <form method="GET" action="{{ url_for('verify_form') }}" style="display:flex;gap:10px">
+      <input type="text" name="hash" class="form-input" style="flex:1;font-family:monospace"
+             placeholder="Paste a 64-character credential hash" value="{{ cred_hash }}">
+      <button class="btn btn-primary" type="submit">Verify</button>
+    </form>
+  </div>
+
+  {% if result is not none %}
+  <div class="card" style="padding:24px">
+    {% if result.error %}
+      <h2>⚠ Could not reach the blockchain</h2>
+      <p>{{ result.error }}</p>
+    {% elif not result.exists %}
+      <h2 style="color:#B71C1C">✖ Not found</h2>
+      <p>This hash is not registered on the blockchain. The credential is not authentic, or it was never issued.</p>
+    {% elif result.revoked %}
+      <h2 style="color:#B71C1C">✖ Revoked</h2>
+      <p>This credential was issued but has since been revoked by its issuer.</p>
+    {% else %}
+      <h2 style="color:#00695C">✔ Authentic — registered on the blockchain</h2>
+      <p>Issued {{ result.issued_at|fmt_ts }} by issuer account <code style="word-break:break-all">{{ result.issuer }}</code></p>
+    {% endif %}
+
+    {% if row %}
+      <hr style="margin:16px 0;opacity:.2">
+      <table class="data-table">
+        <tr><th style="width:150px">Holder</th><td>{{ row.holder }}</td></tr>
+        <tr><th>Credential</th><td>{{ row.title }}</td></tr>
+        <tr><th>Issued by</th><td>{{ row.issuer_name }}</td></tr>
+        <tr><th>Issue date</th><td>{{ row.issued_on }}</td></tr>
+        <tr><th>Skills</th><td>{{ row.skills }}</td></tr>
+        <tr><th>Record integrity</th><td>
+          {% if intact %}<span class="chip chip-green">✔ stored details still hash to the on-chain value</span>
+          {% else %}<span class="chip chip-red">⚠ stored details were altered after issuing</span>{% endif %}
+        </td></tr>
+      </table>
+    {% endif %}
+    <p style="font-size:12px;opacity:.65;margin-top:14px;word-break:break-all">Hash: {{ cred_hash }}<br>
+      Network: {{ chain_info.network }}{% if chain_info.mode == 'local' %} — <em>demo mode: simulated local chain</em>{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

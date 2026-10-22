@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_pagination.html" import pager %}
+{% block title %}Applicants — Admin{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">👥 Applicants</h1>
+      <p class="page-sub">{{ total }} application{{ 's' if total != 1 }} · move candidates through the pipeline; they are notified of changes.</p>
+    </div>
+    <a class="btn btn-outline" href="{{ url_for('admin_applications_export', **qargs) }}">⬇ Export CSV</a>
+  </div>
+
+  <div class="status-tabs">
+    <a class="status-tab {{ 'active' if not status }}" href="{{ url_for('admin_applications', q=q) }}">All <b>{{ total }}</b></a>
+    {% for st in statuses %}<a class="status-tab {{ 'active' if status == st }}" href="{{ url_for('admin_applications', status=st, q=q) }}">{{ st }} <b>{{ counts[st] }}</b></a>{% endfor %}
+  </div>
+
+  <form method="GET" class="card admin-filter">
+    <input type="hidden" name="status" value="{{ status }}">
+    <input type="text" name="q" class="form-input" value="{{ q }}" placeholder="Search candidate name, email, job or company" maxlength="80">
+    <button class="btn btn-primary" type="submit">Search</button>
+    {% if q or status %}<a class="btn btn-outline" href="{{ url_for('admin_applications') }}">Clear</a>{% endif %}
+  </form>
+
+  <div class="card" style="padding:0">
+    <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Candidate</th><th>Job</th><th>Match</th><th>Credentials</th><th>Proof</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for it in items %}{% set r = it.row %}{% set st = r.status or 'Applied' %}
+        <tr>
+          <td><strong>{{ r.cand_name }}</strong><div class="app-meta">{{ r.cand_email }}</div></td>
+          <td>{{ r.job_title }}<div class="app-meta">{{ r.company }} · {{ (r.applied_at or '')[:10] }}</div></td>
+          <td>{% if it.match %}<span class="chip {{ 'chip-green' if it.match.pct >= 70 else 'chip-blue' if it.match.pct >= 45 else 'chip-gray' }}" title="{{ it.match.matched|length }} of {{ it.match.matched|length + it.match.missing|length }} required skills">{{ it.match.pct }}%</span>
+              {% if it.match.verified %}<div class="app-meta">🔗 {{ it.match.verified|length }} verified skill(s)</div>{% endif %}
+              {% else %}<span class="chip chip-gray" title="Candidate has no skills on their profile">no data</span>{% endif %}</td>
+          <td>{% for c in it.creds %}<a class="chip chip-trunc {{ 'chip-red' if c.status == 'revoked' else 'chip-purple' }}" href="{{ url_for('verify_credential', cred_hash=c.cred_hash) }}" target="_blank" rel="noopener" title="{{ c.title }} — open verification page">{{ c.title }}</a> {% else %}<span class="app-meta">none</span>{% endfor %}</td>
+          <td>{% if r.tx_hash %}<span class="chip chip-purple" title="{{ r.tx_hash }}">block {{ r.block_number }}</span>{% else %}<span class="app-meta">—</span>{% endif %}</td>
+          <td>
+            <form method="POST" action="{{ url_for('admin_application_status', app_id=r.id) }}" class="status-form" data-no-lock>
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="f_status" value="{{ status }}"><input type="hidden" name="f_q" value="{{ q }}"><input type="hidden" name="f_page" value="{{ pg.page }}">
+              <span class="status-pill st-{{ st|lower }}">{{ st }}</span>
+              <select name="status" class="form-input-sm" aria-label="Set status" onchange="this.form.submit()">
+                {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == st }}>{{ s }}</option>{% endfor %}
+              </select>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" style="text-align:center;padding:28px;opacity:.7">No applications match.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {{ pager(pg, 'admin_applications', qargs) }}
+</div>
+{% endblock %}
